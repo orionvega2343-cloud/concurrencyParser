@@ -5,6 +5,7 @@ import (
 	"concurrencyParser/parser"
 	"concurrencyParser/storage"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 )
@@ -15,6 +16,9 @@ func main() {
 		os.Getenv("DB_PASSWORD"),
 	)
 	db, err := storage.NewDB(connStr)
+	if err = storage.CreateTable(db); err != nil {
+		log.Fatal(err)
+	}
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -23,6 +27,6 @@ func main() {
 	fmt.Println("Сервер запущен на порту 8080")
 	http.HandleFunc("/result", h.HandleGet)
 	go parser.ScrapeRia("https://ria.ru", db)
-	go parser.ScrapeRbk("https://rbc.ru", db)
+	go parser.ScrapeRbk("https://lenta.ru", db)
 	http.ListenAndServe(":8080", nil)
 }

@@ -3,6 +3,8 @@ package storage
 import (
 	"concurrencyParser/models"
 	"database/sql"
+
+	_ "github.com/lib/pq"
 )
 
 func NewDB(connStr string) (*sql.DB, error) {

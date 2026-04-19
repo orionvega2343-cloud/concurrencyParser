@@ -13,13 +13,13 @@ func ScrapeRia(URL string, db *sql.DB) ([]models.Response, error) {
 	c := colly.NewCollector(colly.Async(true))
 	var res []models.Response
 	c.OnHTML("a.cell-list__item-link", func(e *colly.HTMLElement) {
-		r := models.Response{Header: e.Text, Link: e.Attr("href")}
+		link := e.Request.AbsoluteURL(e.Attr("href"))
+		r := models.Response{Header: e.Text, Link: link}
 		resp, err := storage.Insert(db, r)
 		if err != nil {
 			fmt.Println(err)
 		}
 		res = append(res, resp)
-
 	})
 	c.Visit(URL)
 	c.Wait()
@@ -29,8 +29,9 @@ func ScrapeRia(URL string, db *sql.DB) ([]models.Response, error) {
 func ScrapeRbk(URL string, db *sql.DB) ([]models.Response, error) {
 	c := colly.NewCollector(colly.Async(true))
 	var res []models.Response
-	c.OnHTML("a.news-feed__item", func(e *colly.HTMLElement) {
-		r := models.Response{Header: e.Text, Link: e.Attr("href")}
+	c.OnHTML("a.card-mini", func(e *colly.HTMLElement) {
+		link := e.Request.AbsoluteURL(e.Attr("href"))
+		r := models.Response{Header: e.Text, Link: link}
 		resp, err := storage.Insert(db, r)
 		if err != nil {
 			fmt.Println(err)
