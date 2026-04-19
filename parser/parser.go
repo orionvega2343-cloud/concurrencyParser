@@ -2,28 +2,40 @@ package parser
 
 import (
 	"concurrencyParser/models"
+	"concurrencyParser/storage"
+	"database/sql"
+	"fmt"
 
 	"github.com/gocolly/colly"
 )
 
-func ScrapeRia(URL string) ([]models.Response, error) {
+func ScrapeRia(URL string, db *sql.DB) ([]models.Response, error) {
 	c := colly.NewCollector(colly.Async(true))
 	var res []models.Response
 	c.OnHTML("a.cell-list__item-link", func(e *colly.HTMLElement) {
 		r := models.Response{Header: e.Text, Link: e.Attr("href")}
-		res = append(res, r)
+		resp, err := storage.Insert(db, r)
+		if err != nil {
+			fmt.Println(err)
+		}
+		res = append(res, resp)
+
 	})
 	c.Visit(URL)
 	c.Wait()
 	return res, nil
 }
 
-func ScrapeRbk(URL string) ([]models.Response, error) {
+func ScrapeRbk(URL string, db *sql.DB) ([]models.Response, error) {
 	c := colly.NewCollector(colly.Async(true))
 	var res []models.Response
 	c.OnHTML("a.news-feed__item", func(e *colly.HTMLElement) {
 		r := models.Response{Header: e.Text, Link: e.Attr("href")}
-		res = append(res, r)
+		resp, err := storage.Insert(db, r)
+		if err != nil {
+			fmt.Println(err)
+		}
+		res = append(res, resp)
 	})
 	c.Visit(URL)
 	c.Wait()
